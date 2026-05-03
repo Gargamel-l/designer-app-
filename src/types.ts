@@ -1,5 +1,3 @@
-export type Tab = 'wardrobe' | 'match' | 'outfits'
-
 export type ClothingCategory =
   | 'jacket'
   | 'tshirt'
@@ -9,7 +7,38 @@ export type ClothingCategory =
   | 'shorts'
   | 'shoes'
 
-export type ClothingStyle = 'sport' | 'casual' | 'festive' | 'formal'
+export const CATEGORY_LABELS: Record<ClothingCategory, string> = {
+  jacket: 'КУРТКА (верхний слой)',
+  tshirt: 'ФУТБОЛКА (нижний слой)',
+  longsleeve: 'ДЛИННЫЙ РУКАВ',
+  tanktop: 'МАЙКА',
+  pants: 'ШТАНЫ',
+  shorts: 'ШОРТЫ',
+  shoes: 'ОБУВЬ',
+}
+
+export const CATEGORY_SHORT: Record<ClothingCategory, string> = {
+  jacket: 'КУРТКА',
+  tshirt: 'ФУТБОЛКА',
+  longsleeve: 'ДЛИННЫЙ РУКАВ',
+  tanktop: 'МАЙКА',
+  pants: 'ШТАНЫ',
+  shorts: 'ШОРТЫ',
+  shoes: 'ОБУВЬ',
+}
+
+export type ClothingStyle =
+  | 'sport'
+  | 'casual'
+  | 'festive'
+  | 'formal'
+
+export const ALL_CLOTHING_STYLES: ClothingStyle[] = [
+  'sport',
+  'casual',
+  'festive',
+  'formal',
+]
 
 export type OutfitTag =
   | 'sport'
@@ -22,24 +51,13 @@ export type OutfitTag =
   | 'winter'
   | 'favorite'
 
-export type ColorFamily =
-  | 'black'
-  | 'white'
-  | 'gray'
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'blue'
-  | 'purple'
-  | 'pink'
-  | 'brown'
-  | 'beige'
+export type ColorFamily = 'blue' | 'gray' | 'red' | 'yellow' | 'green'
 
-export type ColorEntry = {
+export interface ColorEntry {
   name: string
   hex: string
   family: ColorFamily
+  lightness: number
 }
 
 export interface ClothingItem {
@@ -47,34 +65,28 @@ export interface ClothingItem {
   category: ClothingCategory
   image: string
   color: ColorEntry
-  createdAt: number
+
+  /**
+   * У одной вещи может быть несколько стилей.
+   * Например: ['sport', 'casual'].
+   */
+  styles: ClothingStyle[]
+
+  /**
+   * Старое поле оставляем только для совместимости со старыми сохранёнными вещами.
+   * В новой логике используется styles.
+   */
   style?: ClothingStyle
+
+  createdAt: number
 }
 
 export interface Outfit {
   id: string
   itemIds: string[]
+  tags?: OutfitTag[]
   isFavorite: boolean
   createdAt: number
-  tags?: OutfitTag[]
 }
 
-export const CATEGORY_LABELS: Record<ClothingCategory, string> = {
-  jacket: 'Куртка / верхний слой',
-  tshirt: 'Футболка',
-  longsleeve: 'Лонгслив',
-  tanktop: 'Майка',
-  pants: 'Брюки',
-  shorts: 'Шорты',
-  shoes: 'Обувь',
-}
-
-export const CATEGORY_SHORT: Record<ClothingCategory, string> = {
-  jacket: 'Куртка',
-  tshirt: 'Футболка',
-  longsleeve: 'Лонгслив',
-  tanktop: 'Майка',
-  pants: 'Брюки',
-  shorts: 'Шорты',
-  shoes: 'Обувь',
-}
+export type Tab = 'wardrobe' | 'outfits' | 'upload' | 'match' | 'profile'

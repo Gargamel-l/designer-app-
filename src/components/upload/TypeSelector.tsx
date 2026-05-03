@@ -1,46 +1,41 @@
-import { Box, Button } from '@mui/material'
-import { CATEGORY_LABELS, ClothingCategory } from '../../types'
-
-type Props = {
-  value: ClothingCategory | null
-  onChange: (value: ClothingCategory) => void
-}
+import { Box, Typography, ButtonBase } from '@mui/material'
+import { ClothingCategory, CATEGORY_LABELS } from '../../types'
 
 const CATEGORIES: ClothingCategory[] = [
-  'jacket',
-  'tshirt',
-  'longsleeve',
-  'tanktop',
-  'pants',
-  'shorts',
-  'shoes',
+  'jacket', 'tshirt', 'longsleeve', 'tanktop', 'pants', 'shorts', 'shoes',
 ]
 
-export default function TypeSelector({ value, onChange }: Props) {
-  return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 1.25 }}>
-      {CATEGORIES.map(category => {
-        const active = value === category
+interface Props {
+  onSelect: (cat: ClothingCategory) => void
+}
 
-        return (
-          <Button
-            key={category}
-            variant={active ? 'contained' : 'outlined'}
-            onClick={() => onChange(category)}
+export default function TypeSelector({ onSelect }: Props) {
+  return (
+    <Box sx={{ p: 3, pt: 2 }}>
+      <Typography variant="h2" sx={{ mb: 2, fontSize: '1rem' }}>
+        ВЫБЕРИТЕ ФОРМУ ЗАГРУЗКИ ОДЕЖДЫ
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {CATEGORIES.map(cat => (
+          <ButtonBase
+            key={cat}
+            onClick={() => onSelect(cat)}
             sx={{
-              minHeight: 46,
-              borderRadius: '10px',
-              textTransform: 'none',
-              fontWeight: 600,
-              bgcolor: active ? '#111' : undefined,
-              color: active ? '#fff' : '#111',
-              borderColor: '#111',
+              display: 'block',
+              textAlign: 'left',
+              py: 1.75,
+              px: 1,
+              borderBottom: '1px solid #e0e0e0',
+              '&:hover': { bgcolor: '#f5f5f5' },
+              '&:last-child': { borderBottom: 'none' },
             }}
           >
-            {CATEGORY_LABELS[category]}
-          </Button>
-        )
-      })}
+            <Typography variant="h3" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
+              {CATEGORY_LABELS[cat]}
+            </Typography>
+          </ButtonBase>
+        ))}
+      </Box>
     </Box>
   )
 }

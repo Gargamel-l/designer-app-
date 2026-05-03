@@ -1,23 +1,18 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Outfit, OutfitTag } from '../types'
+import { useState, useEffect, useCallback } from 'react'
+import { Outfit } from '../types'
 
-const KEY = 'saved_outfits_v2'
+const KEY = 'outfits_v1'
 
 function load(): Outfit[] {
   try {
     return JSON.parse(localStorage.getItem(KEY) ?? '[]')
-  } catch (error) {
-    console.error('Failed to load outfits', error)
+  } catch {
     return []
   }
 }
 
-function save(items: Outfit[]) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(items))
-  } catch (error) {
-    console.error('Failed to save outfits', error)
-  }
+function save(outfits: Outfit[]) {
+  localStorage.setItem(KEY, JSON.stringify(outfits))
 }
 
 export function useOutfits() {
@@ -27,41 +22,25 @@ export function useOutfits() {
     save(outfits)
   }, [outfits])
 
-  const addOutfit = useCallback((outfit: Outfit) => {
+  const saveOutfit = useCallback((outfit: Outfit) => {
     setOutfits(prev => {
-      const exists = prev.some(item => item.id === outfit.id)
-      if (exists) return prev
+      const exists = prev.some(o => o.id === outfit.id)
+      if (exists) return prev.map(o => (o.id === outfit.id ? outfit : o))
       return [outfit, ...prev]
     })
   }, [])
 
   const removeOutfit = useCallback((id: string) => {
-    setOutfits(prev => prev.filter(item => item.id !== id))
+    setOutfits(prev => prev.filter(o => o.id !== id))
   }, [])
 
-  const updateTags = useCallback((id: string, tags: OutfitTag[]) => {
+  const toggleFavorite = useCallback((id: string) => {
     setOutfits(prev =>
-      prev.map(item => {
-        if (item.id !== id) return item
-        return { ...item, tags }
-      }),
+      prev.map(o => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
     )
   }, [])
 
-  const setLiked = useCallback((id: string, liked: boolean) => {
-    setOutfits(prev =>
-      prev.map(item => {
-        if (item.id !== id) return item
-        return { ...item, liked }
-      }),
-    )
-  }, [])
+  const favoriteOutfits = outfits.filter(o => o.isFavorite)
 
-  return {
-    outfits,
-    addOutfit,
-    removeOutfit,
-    updateTags,
-    setLiked,
-  }
+  return { outfits, favoriteOutfits, saveOutfit, removeOutfit, toggleFavorite }
 }

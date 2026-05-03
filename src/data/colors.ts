@@ -1,48 +1,69 @@
 import { ColorEntry, ColorFamily } from '../types'
 
+function makeShades(
+  family: ColorFamily,
+  hexes: string[],
+  lightnessStart = 95,
+  lightnessStep = -8
+): ColorEntry[] {
+  return hexes.map((hex, i) => ({
+    name: `${family.charAt(0).toUpperCase() + family.slice(1)} ${i * 10}`,
+    hex,
+    family,
+    lightness: Math.max(0, lightnessStart + i * lightnessStep),
+  }))
+}
+
+const blues = makeShades('blue', [
+  '#EBF0FF', '#D6E2FF', '#BDD0FF', '#9DBDFF', '#79A8FF',
+  '#5590FF', '#2D77FF', '#0060FF', '#004FD6', '#003FAD',
+  '#002E84',
+])
+
+const grays = makeShades('gray', [
+  '#FFFFFF', '#F5F5F5', '#E8E8E8', '#D4D4D4', '#ABABAB',
+  '#8A8A8A', '#6B6B6B', '#4E4E4E', '#333333', '#1A1A1A',
+  '#000000',
+])
+
+const reds = makeShades('red', [
+  '#FFF5F5', '#FFE0E0', '#FFC5C5', '#FFA3A3', '#FF7878',
+  '#FF4D4D', '#FF2020', '#E60000', '#BD0000', '#940000',
+  '#6B0000',
+])
+
+const yellows = makeShades('yellow', [
+  '#FFFDE0', '#FFF8B0', '#FFF080', '#FFE54D', '#FFD900',
+  '#FFCC00', '#FFBF00', '#E6A800', '#BD8800', '#946800',
+  '#6B4A00',
+])
+
+const greens = makeShades('green', [
+  '#F0FBF0', '#D6F5D6', '#AEEAAE', '#80DC80', '#50CE50',
+  '#28BF28', '#0FAF0F', '#0A9A0A', '#077A07', '#045A04',
+  '#023A02',
+])
+
 export const COLOR_PALETTE: ColorEntry[] = [
-  { name: 'Черный', hex: '#000000', family: 'black' },
-  { name: 'Белый', hex: '#FFFFFF', family: 'white' },
-  { name: 'Серый', hex: '#808080', family: 'gray' },
-  { name: 'Красный', hex: '#D32F2F', family: 'red' },
-  { name: 'Оранжевый', hex: '#F57C00', family: 'orange' },
-  { name: 'Желтый', hex: '#FBC02D', family: 'yellow' },
-  { name: 'Зеленый', hex: '#388E3C', family: 'green' },
-  { name: 'Синий', hex: '#1976D2', family: 'blue' },
-  { name: 'Фиолетовый', hex: '#7B1FA2', family: 'purple' },
-  { name: 'Розовый', hex: '#E91E63', family: 'pink' },
-  { name: 'Коричневый', hex: '#6D4C41', family: 'brown' },
-  { name: 'Бежевый', hex: '#D7CCC8', family: 'beige' },
+  ...blues,
+  ...grays,
+  ...reds,
+  ...yellows,
+  ...greens,
 ]
 
-export const COLORS = COLOR_PALETTE
-
 export const PALETTE_BY_FAMILY: Record<ColorFamily, ColorEntry[]> = {
-  black: COLOR_PALETTE.filter(c => c.family === 'black'),
-  white: COLOR_PALETTE.filter(c => c.family === 'white'),
-  gray: COLOR_PALETTE.filter(c => c.family === 'gray'),
-  red: COLOR_PALETTE.filter(c => c.family === 'red'),
-  orange: COLOR_PALETTE.filter(c => c.family === 'orange'),
-  yellow: COLOR_PALETTE.filter(c => c.family === 'yellow'),
-  green: COLOR_PALETTE.filter(c => c.family === 'green'),
-  blue: COLOR_PALETTE.filter(c => c.family === 'blue'),
-  purple: COLOR_PALETTE.filter(c => c.family === 'purple'),
-  pink: COLOR_PALETTE.filter(c => c.family === 'pink'),
-  brown: COLOR_PALETTE.filter(c => c.family === 'brown'),
-  beige: COLOR_PALETTE.filter(c => c.family === 'beige'),
+  blue: blues,
+  gray: grays,
+  red: reds,
+  yellow: yellows,
+  green: greens,
 }
 
 export const FAMILY_LABELS: Record<ColorFamily, string> = {
-  black: 'Черные',
-  white: 'Белые',
-  gray: 'Серые',
-  red: 'Красные',
-  orange: 'Оранжевые',
-  yellow: 'Желтые',
-  green: 'Зеленые',
-  blue: 'Синие',
-  purple: 'Фиолетовые',
-  pink: 'Розовые',
-  brown: 'Коричневые',
-  beige: 'Бежевые',
+  blue: 'Синий',
+  gray: 'Серый',
+  red: 'Красный',
+  yellow: 'Жёлтый',
+  green: 'Зелёный',
 }

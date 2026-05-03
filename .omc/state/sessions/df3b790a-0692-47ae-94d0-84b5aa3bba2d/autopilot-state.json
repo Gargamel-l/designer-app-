@@ -1,0 +1,10 @@
+{
+  "active": true,
+  "started_at": "2026-04-20T23:38:05.101Z",
+  "original_prompt": "/autopilot разберись с подбором образов, если не хватает комбинаций, используй что есть (типа если только одна куртка и одни штаны то их), но проверь и отработай алгоритм подбора. сбилди потом новый APK",
+  "session_id": "df3b790a-0692-47ae-94d0-84b5aa3bba2d",
+  "project_path": "C:\\Users\\mxp\\DEV\\Z3R\\color-app",
+  "reinforcement_count": 0,
+  "awaiting_confirmation": true,
+  "last_checked_at": "2026-04-20T23:38:05.103Z"
+}

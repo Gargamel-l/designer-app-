@@ -1,5 +1,8 @@
 import { createTheme } from '@mui/material/styles'
 
+const APP_FONT =
+  '"Inter", "Roboto", "Arial", sans-serif'
+
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -8,33 +11,119 @@ const theme = createTheme({
     background: { default: '#f5f5f5', paper: '#ffffff' },
     text: { primary: '#000000', secondary: '#666666' },
   },
+
   typography: {
-    fontFamily: '"Inter", sans-serif',
-    h1: { fontWeight: 900, fontSize: '2rem', letterSpacing: '-0.02em', textTransform: 'uppercase' },
-    h2: { fontWeight: 700, fontSize: '1.25rem', letterSpacing: '0.05em', textTransform: 'uppercase' },
-    h3: { fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase' },
-    body1: { fontWeight: 400, fontSize: '0.875rem' },
-    body2: { fontWeight: 400, fontSize: '0.75rem', color: '#666' },
-    caption: { fontWeight: 500, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' },
+    fontFamily: APP_FONT,
+
+    h1: {
+      fontFamily: APP_FONT,
+      fontWeight: 900,
+      fontSize: '2rem',
+      letterSpacing: '-0.02em',
+      textTransform: 'uppercase',
+      lineHeight: 1,
+    },
+
+    h2: {
+      fontFamily: APP_FONT,
+      fontWeight: 800,
+      fontSize: '1.25rem',
+      letterSpacing: '0.04em',
+      textTransform: 'uppercase',
+      lineHeight: 1.15,
+    },
+
+    h3: {
+      fontFamily: APP_FONT,
+      fontWeight: 700,
+      fontSize: '1rem',
+      textTransform: 'uppercase',
+      lineHeight: 1.2,
+    },
+
+    body1: {
+      fontFamily: APP_FONT,
+      fontWeight: 600,
+      fontSize: '0.875rem',
+      lineHeight: 1.45,
+    },
+
+    body2: {
+      fontFamily: APP_FONT,
+      fontWeight: 500,
+      fontSize: '0.75rem',
+      lineHeight: 1.45,
+      color: '#666',
+    },
+
+    caption: {
+      fontFamily: APP_FONT,
+      fontWeight: 600,
+      fontSize: '0.65rem',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      lineHeight: 1.3,
+    },
+
+    button: {
+      fontFamily: APP_FONT,
+      fontWeight: 800,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+    },
   },
+
   shape: { borderRadius: 0 },
+
   components: {
-    MuiPaper: {
+    MuiCssBaseline: {
       styleOverrides: {
-        root: { borderRadius: 0, boxShadow: 'none' },
+        html: {
+          fontFamily: APP_FONT,
+        },
+        body: {
+          fontFamily: APP_FONT,
+          fontStyle: 'normal',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+        },
+        '*': {
+          boxSizing: 'border-box',
+        },
       },
     },
+
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          fontFamily: APP_FONT,
+          fontStyle: 'normal',
+        },
+      },
+    },
+
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          boxShadow: 'none',
+        },
+      },
+    },
+
     MuiButton: {
       styleOverrides: {
         root: {
           borderRadius: 0,
           textTransform: 'uppercase',
-          fontWeight: 700,
-          letterSpacing: '0.1em',
+          fontWeight: 800,
+          letterSpacing: '0.08em',
           boxShadow: 'none',
+          fontFamily: APP_FONT,
         },
       },
     },
+
     MuiBottomNavigation: {
       styleOverrides: {
         root: {
@@ -44,31 +133,47 @@ const theme = createTheme({
         },
       },
     },
+
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
           minWidth: 40,
           padding: '6px 0',
           color: '#999',
+          fontFamily: APP_FONT,
           '&.Mui-selected': { color: '#000' },
         },
         label: {
+          fontFamily: APP_FONT,
           fontSize: '0.6rem',
-          fontWeight: 600,
+          fontWeight: 700,
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
           '&.Mui-selected': { fontSize: '0.6rem' },
         },
       },
     },
+
     MuiIconButton: {
-      styleOverrides: { root: { borderRadius: 0 } },
+      styleOverrides: {
+        root: { borderRadius: 0 },
+      },
     },
+
     MuiDialog: {
-      styleOverrides: { paper: { borderRadius: 0 } },
+      styleOverrides: {
+        paper: { borderRadius: 0 },
+      },
     },
+
     MuiChip: {
-      styleOverrides: { root: { borderRadius: 2 } },
+      styleOverrides: {
+        root: {
+          borderRadius: 2,
+          fontFamily: APP_FONT,
+          fontWeight: 600,
+        },
+      },
     },
   },
 })

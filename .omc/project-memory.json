@@ -1,0 +1,312 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776719085459,
+  "projectRoot": "C:\\Users\\mxp\\DEV\\Z3R\\color-app",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "5.4.2",
+        "category": "build"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc -b && vite build",
+      "preview": "vite preview",
+      "serve": "npm run build && vite preview"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1776719085364,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 1,
+      "lastAccessed": 1776719085365,
+      "keyFiles": [
+        "manifest.json"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 5,
+      "lastAccessed": 1776719085366,
+      "keyFiles": [
+        "App.tsx",
+        "AppContext.tsx",
+        "main.tsx",
+        "theme.ts",
+        "types.ts"
+      ]
+    },
+    "dist\\assets": {
+      "path": "dist\\assets",
+      "purpose": "Static assets",
+      "fileCount": 6,
+      "lastAccessed": 1776719085367,
+      "keyFiles": [
+        "index-gjZ6q_SY.js",
+        "ort-wasm-simd-threaded.jsep-D5Jk56-t.wasm",
+        "ort.bundle.min-CmHfnmOO.js"
+      ]
+    },
+    "src\\components": {
+      "path": "src\\components",
+      "purpose": "UI components",
+      "fileCount": 4,
+      "lastAccessed": 1776719085370,
+      "keyFiles": [
+        "ClothingCard.tsx",
+        "ItemDetailDialog.tsx",
+        "OutfitComposite.tsx"
+      ]
+    },
+    "src\\data": {
+      "path": "src\\data",
+      "purpose": "Data files",
+      "fileCount": 1,
+      "lastAccessed": 1776719085371,
+      "keyFiles": [
+        "colors.ts"
+      ]
+    },
+    "src\\utils": {
+      "path": "src\\utils",
+      "purpose": "Utility functions",
+      "fileCount": 3,
+      "lastAccessed": 1776719085372,
+      "keyFiles": [
+        "colorCompatibility.ts",
+        "colorDetection.ts",
+        "outfitGenerator.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src\\utils\\outfitGenerator.ts",
+      "accessCount": 7,
+      "lastAccessed": 1776728674312,
+      "type": "file"
+    },
+    {
+      "path": "src\\screens\\MatchScreen.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1776728611643,
+      "type": "file"
+    },
+    {
+      "path": "android\\app\\src\\main\\AndroidManifest.xml",
+      "accessCount": 3,
+      "lastAccessed": 1776720470846,
+      "type": "file"
+    },
+    {
+      "path": "src\\utils\\colorCompatibility.ts",
+      "accessCount": 3,
+      "lastAccessed": 1776728305323,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\OutfitComposite.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1776728316086,
+      "type": "file"
+    },
+    {
+      "path": "index.html",
+      "accessCount": 2,
+      "lastAccessed": 1776719190007,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 2,
+      "lastAccessed": 1776720357176,
+      "type": "file"
+    },
+    {
+      "path": "android\\local.properties",
+      "accessCount": 2,
+      "lastAccessed": 1776720515320,
+      "type": "file"
+    },
+    {
+      "path": "android\\gradle.properties",
+      "accessCount": 2,
+      "lastAccessed": 1776720601514,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 2,
+      "lastAccessed": 1776728404490,
+      "type": "file"
+    },
+    {
+      "path": "src\\App.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1776771197139,
+      "type": "file"
+    },
+    {
+      "path": "capacitor.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1776771197932,
+      "type": "file"
+    },
+    {
+      "path": "src\\data\\colors.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776728305122,
+      "type": "file"
+    },
+    {
+      "path": "src\\AppContext.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728308962,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useWardrobe.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776728309285,
+      "type": "file"
+    },
+    {
+      "path": "src\\hooks\\useOutfits.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776728309342,
+      "type": "file"
+    },
+    {
+      "path": "src\\screens\\OutfitsScreen.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728312665,
+      "type": "file"
+    },
+    {
+      "path": "src\\screens\\WardrobeScreen.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728312826,
+      "type": "file"
+    },
+    {
+      "path": "src\\utils\\colorDetection.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776728316286,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\upload\\UploadDialog.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728319293,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\upload\\ColorAssign.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728319597,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ClothingCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728319833,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\upload\\PhotoCapture.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728322584,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\upload\\TypeSelector.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728323108,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ItemDetailDialog.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776728323223,
+      "type": "file"
+    },
+    {
+      "path": "src\\theme.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776771197639,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1776771290547,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

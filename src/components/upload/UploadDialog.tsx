@@ -1,15 +1,22 @@
-import { useEffect, useState } from 'react'
-import { Box, Button, Dialog, DialogContent, DialogTitle } from '@mui/material'
+import { useState } from 'react'
+import { Dialog, Box, IconButton, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { v4 as uuidv4 } from 'uuid'
-import { ClothingCategory, ClothingItem, ClothingStyle, ColorEntry } from '../../types'
+import {
+  ClothingCategory,
+  ClothingItem,
+  ClothingStyle,
+  ColorEntry,
+} from '../../types'
 import TypeSelector from './TypeSelector'
 import PhotoCapture from './PhotoCapture'
 import ColorAssign from './ColorAssign'
 import StyleSelector from './StyleSelector'
 
-type Step = 'type' | 'photo' | 'color' | 'style'
+type Step = 'type' | 'photo' | 'color'
 
-type Props = {
+interface Props {
   open: boolean
   onClose: () => void
   onSave: (item: ClothingItem) => void
@@ -18,134 +25,152 @@ type Props = {
 export default function UploadDialog({ open, onClose, onSave }: Props) {
   const [step, setStep] = useState<Step>('type')
   const [category, setCategory] = useState<ClothingCategory | null>(null)
-  const [image, setImage] = useState<string>('')
-  const [color, setColor] = useState<ColorEntry | null>(null)
-  const [style, setStyle] = useState<ClothingStyle>('casual')
+  const [image, setImage] = useState<string | null>(null)
+  const [detectedColor, setDetectedColor] = useState<ColorEntry | null>(null)
 
-  const reset = () => {
+  // Пустой массив = без стиля = универсальная вещь.
+  const [styles, setStyles] = useState<ClothingStyle[]>([])
+
+  function resetState() {
     setStep('type')
     setCategory(null)
-    setImage('')
-    setColor(null)
-    setStyle('casual')
+    setImage(null)
+    setDetectedColor(null)
+    setStyles([])
   }
 
-  useEffect(() => {
-    if (!open) {
-      reset()
-    }
-  }, [open])
-
-  const handleClose = () => {
+  function handleClose() {
     onClose()
-    reset()
+    resetState()
   }
 
-  const handleCapture = (dataUrl: string, detectedColor: ColorEntry | null) => {
+  function handleTypeSelect(cat: ClothingCategory) {
+    setCategory(cat)
+    setStep('photo')
+  }
+
+  function handleCapture(dataUrl: string, color: ColorEntry | null) {
     setImage(dataUrl)
-    setColor(detectedColor)
+    setDetectedColor(color)
     setStep('color')
   }
 
-  const handleSave = () => {
-    if (!category || !image || !color) return
+  function handleSave(color: ColorEntry) {
+    if (!category || !image) return
 
     onSave({
       id: uuidv4(),
       category,
       image,
       color,
+      styles,
       createdAt: Date.now(),
-      style,
     })
 
     handleClose()
   }
 
+  function handleBack() {
+    if (step === 'photo') {
+      setStep('type')
+      setCategory(null)
+    }
+
+    if (step === 'color') {
+      setStep('photo')
+      setImage(null)
+      setDetectedColor(null)
+    }
+  }
+
+  const stepTitles: Record<Step, string> = {
+    type: 'ШАГ 1 — Тип одежды',
+    photo: 'ШАГ 2 — Фотография',
+    color: 'ШАГ 3 — Цвет и стиль',
+  }
+
   return (
-    <>
-      <Button
-        variant="contained"
-        onClick={() => {
-          reset()
-          setStep('type')
-        }}
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          m: 1,
+          width: 'calc(100% - 16px)',
+          maxHeight: '95vh',
+        },
+      }}
+    >
+      <Box
         sx={{
-          minHeight: 46,
-          borderRadius: '10px',
-          textTransform: 'none',
-          fontWeight: 700,
-          bgcolor: '#111',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          py: 1.5,
+          px: 2,
+          borderBottom: '1px solid #e0e0e0',
         }}
       >
-        Добавить вещь
-      </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {step !== 'type' && (
+            <IconButton size="small" onClick={handleBack} sx={{ p: 0.5 }}>
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
+          )}
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>
-          {step === 'type' && 'Категория'}
-          {step === 'photo' && 'Фото'}
-          {step === 'color' && 'Цвет'}
-          {step === 'style' && 'Стиль'}
-        </DialogTitle>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {stepTitles[step]}
+          </Typography>
+        </Box>
 
-        <DialogContent>
-          {step === 'type' && (
-            <TypeSelector
-              value={category}
-              onChange={(value) => {
-                setCategory(value)
-                setStep('photo')
-              }}
+        <IconButton size="small" onClick={handleClose} sx={{ p: 0.5 }}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      <Box sx={{ overflowY: 'auto' }}>
+        {step === 'type' && (
+          <TypeSelector onSelect={handleTypeSelect} />
+        )}
+
+        {step === 'photo' && category && (
+          <PhotoCapture category={category} onCapture={handleCapture} />
+        )}
+
+        {step === 'color' && image && (
+          <Box>
+            <ColorAssign
+              image={image}
+              initialColor={detectedColor}
+              onSave={handleSave}
             />
-          )}
 
-          {step === 'photo' && category && (
-            <PhotoCapture category={category} onCapture={handleCapture} />
-          )}
-
-          {step === 'color' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <ColorAssign value={color} onChange={(value) => setColor(value)} />
-
-              <Button
-                variant="contained"
-                onClick={() => setStep('style')}
-                disabled={!color}
-                sx={{
-                  minHeight: 46,
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  bgcolor: '#111',
-                }}
-              >
-                Далее
-              </Button>
+            <Box
+              sx={{
+                px: 2,
+                pb: 2,
+                pt: 1,
+                borderTop: '1px solid #e0e0e0',
+              }}
+            >
+              <StyleSelector
+                value={styles}
+                onChange={setStyles}
+                label="Стиль одежды"
+              />
             </Box>
-          )}
-
-          {step === 'style' && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <StyleSelector value={style} onChange={setStyle} />
-
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                sx={{
-                  minHeight: 46,
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  bgcolor: '#111',
-                }}
-              >
-                Сохранить вещь
-              </Button>
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+          </Box>
+        )}
+      </Box>
+    </Dialog>
   )
 }

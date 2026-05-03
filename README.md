@@ -1,21 +1,25 @@
-# ОБРАЗЫ — Приложение для подбора образов
+# ОБРАЗЫ — приложение для подбора образов
 
-Мобильное PWA/Android-приложение для создания гардероба и автоматического подбора образов на основе цветовой совместимости вещей.
+Мобильное PWA/Android-приложение для создания личного гардероба, хранения вещей по аккаунтам и автоматического подбора образов на основе цветовой и стилевой совместимости.
 
 ---
 
 ## Содержание
 
 - [Что делает приложение](#что-делает-приложение)
+- [Тестовые аккаунты](#тестовые-аккаунты)
 - [Архитектура](#архитектура)
 - [Структура проекта](#структура-проекта)
+- [Пользовательские данные и авторизация](#пользовательские-данные-и-авторизация)
 - [Алгоритмы](#алгоритмы)
 - [Зависимости](#зависимости)
-- [Разработка (веб)](#разработка-веб)
+- [Разработка веб](#разработка-веб)
 - [Сборка PWA](#сборка-pwa)
 - [Сборка Android APK](#сборка-android-apk)
 - [Установка APK на устройство](#установка-apk-на-устройство)
 - [Известные особенности](#известные-особенности)
+- [Типы данных](#типы-данных)
+- [Версии и конфигурация](#версии-и-конфигурация)
 
 ---
 
@@ -23,152 +27,301 @@
 
 **ОБРАЗЫ** — это стилистический ассистент, который:
 
-1. **Принимает фото одежды** через камеру или галерею
-2. **Удаляет фон** с изображения прямо в браузере (без серверов)
-3. **Определяет доминирующий цвет** вещи автоматически
-4. **Хранит гардероб** локально на устройстве
-5. **Подбирает образы** из имеющихся вещей по алгоритму цветовой совместимости
-6. **Сохраняет понравившиеся образы** для быстрого доступа
+1. Позволяет войти в приложение по логину и паролю.
+2. Хранит гардероб, образы и избранное отдельно для каждого аккаунта.
+3. Принимает фото одежды через камеру или галерею.
+4. Удаляет фон с изображения прямо в браузере, без серверов.
+5. Определяет доминирующий цвет вещи автоматически.
+6. Позволяет вручную подтвердить или изменить цвет вещи.
+7. Позволяет указать один или несколько стилей вещи.
+8. Позволяет оставить вещь **без стиля** — такая вещь считается универсальной.
+9. Хранит гардероб локально на устройстве.
+10. Подбирает образы из имеющихся вещей по цветовой и стилевой совместимости.
+11. Сохраняет понравившиеся образы для быстрого доступа.
+12. Позволяет выйти из аккаунта на странице **Мои данные**.
 
 ### Экраны
 
 | Вкладка | Что показывает |
 |---|---|
-| **Гардероб** | Все добавленные вещи по категориям, с фото и цветовым тегом |
-| **Образы** | Сохранённые (понравившиеся) образы в виде сетки |
-| **+ Загрузить** | Мастер добавления новой вещи (3 шага) |
+| **Гардероб** | Все добавленные вещи по категориям, с фото, цветом и стилем |
+| **Образы** | Сохранённые понравившиеся образы в виде сетки |
+| **+ Загрузить** | Мастер добавления новой вещи |
 | **Подобрать** | Генератор образов — листаешь и лайкаешь |
-| **Данные** | Статистика гардероба |
+| **Данные** | Информация об аккаунте, статистика и выход из аккаунта |
+
+---
+
+## Тестовые аккаунты
+
+Пока авторизация реализована локально, без сервера.
+
+| Логин | Пароль | Назначение |
+|---|---|---|
+| `root` | `root` | Тестовый администраторский аккаунт |
+| `user` | `user123` | Тестовый пользовательский аккаунт |
+
+Данные этих аккаунтов хранятся отдельно. Вещи и образы, добавленные под `root`, не отображаются под `user`, и наоборот.
 
 ---
 
 ## Архитектура
 
-```
-React (18) + TypeScript
-  └── MUI 5 (Material UI) — компонентная библиотека
-  └── Vite 5 — сборщик
-  └── Capacitor 8 — обёртка для Android
-  └── @imgly/background-removal — удаление фона (ONNX WASM)
-  └── localStorage — хранилище данных (нет бэкенда)
+```text
+React 18 + TypeScript
+  ├── MUI 5 — компонентная библиотека
+  ├── Vite 5 — сборщик
+  ├── Capacitor 8 — Android-обёртка
+  ├── @imgly/background-removal — удаление фона через ONNX WASM
+  ├── localStorage — локальное хранилище данных
+  └── локальная авторизация — root/user без backend-сервера
 ```
 
 ### Поток данных
 
-```
+```text
+Пользователь → AuthScreen
+  └── loginUser(login, password)
+      └── localStorage['current_user_v1']
+
 Пользователь → UploadDialog
-  ├─ TypeSelector  → выбор категории (куртка / футболка / штаны и т.д.)
-  ├─ PhotoCapture  → камера/галерея → удаление фона → detectDominantColor()
-  └─ ColorAssign   → подтверждение/смена цвета → ClothingItem сохраняется
+  ├── TypeSelector   → выбор категории: куртка / футболка / штаны / обувь и т.д.
+  ├── PhotoCapture   → камера/галерея → удаление фона → detectDominantColor()
+  └── ColorAssign    → подтверждение/смена цвета
+        └── StyleSelector → выбор стилей или состояние "Без стиля"
+            └── ClothingItem сохраняется в гардероб текущего аккаунта
 
-ClothingItem → AppContext (useWardrobe) → localStorage['wardrobe_v1']
+ClothingItem → AppContext → useWardrobe(user)
+  └── localStorage[`wardrobe_v1_${user.login}`]
 
-MatchScreen → generateOutfits(items) → пользователь листает
-  └─ лайк → saveOutfit({ isFavorite: true }) → localStorage['outfits_v1']
+MatchScreen → generateOutfits(items)
+  ├── outfitRules.ts        → фильтр по стилям
+  ├── colorCompatibility.ts → оценка совместимости цветов
+  └── лайк → saveOutfit({ isFavorite: true })
+      └── localStorage[`outfits_v1_${user.login}`]
 
-OutfitsScreen → читает favoriteOutfits из контекста
+ProfileScreen
+  ├── показывает текущий аккаунт
+  ├── показывает статистику
+  └── logoutUser() → очистка current_user_v1
 ```
 
 ---
 
 ## Структура проекта
 
-```
+```text
 color-app/
 ├── src/
-│   ├── main.tsx                    # точка входа React
-│   ├── App.tsx                     # shell: нижняя навигация + роутинг вкладок
-│   ├── AppContext.tsx               # глобальный контекст (items, outfits, tab)
-│   ├── theme.ts                    # MUI тема (чёрно-белый минимализм, Inter)
-│   ├── types.ts                    # все TypeScript-типы
+│   ├── main.tsx                         # точка входа React
+│   ├── App.tsx                          # shell: авторизация + нижняя навигация + вкладки
+│   ├── AppContext.tsx                   # глобальный контекст items/outfits/tab/uploadOpen
+│   ├── auth.ts                          # локальная авторизация root/user
+│   ├── theme.ts                         # MUI тема, единый стиль шрифтов и UI
+│   ├── types.ts                         # TypeScript-типы приложения
+│   │
+│   ├── constants/
+│   │   └── styleLabels.ts               # подписи стилей одежды
 │   │
 │   ├── hooks/
-│   │   ├── useWardrobe.ts          # CRUD для ClothingItem + localStorage
-│   │   └── useOutfits.ts           # CRUD для Outfit + localStorage
+│   │   ├── useAuth.ts                   # состояние авторизации
+│   │   ├── useWardrobe.ts               # CRUD для ClothingItem + user-based localStorage
+│   │   └── useOutfits.ts                # CRUD для Outfit + user-based localStorage
 │   │
 │   ├── data/
-│   │   └── colors.ts               # палитра 55 цветов (5 семей × 11 оттенков)
+│   │   └── colors.ts                    # палитра 55 цветов, 5 семейств × 11 оттенков
 │   │
 │   ├── utils/
-│   │   ├── colorCompatibility.ts   # areColorsCompatible(), outfitColorScore()
-│   │   ├── colorDetection.ts       # detectDominantColor() — canvas API
-│   │   └── outfitGenerator.ts      # generateOutfits() — основной алгоритм
+│   │   ├── colorCompatibility.ts        # areColorsCompatible(), outfitColorScore()
+│   │   ├── colorDetection.ts            # detectDominantColor() через canvas API
+│   │   ├── outfitGenerator.ts           # generateOutfits() — генерация образов
+│   │   └── outfitRules.ts               # проверка совместимости стилей и структуры образа
 │   │
 │   ├── screens/
-│   │   ├── WardrobeScreen.tsx      # список вещей гардероба
-│   │   ├── OutfitsScreen.tsx       # сохранённые образы (сетка 2 колонки)
-│   │   ├── MatchScreen.tsx         # подбор образов (листалка с лайком)
-│   │   └── ProfileScreen.tsx       # статистика
+│   │   ├── AuthScreen.tsx               # экран входа по логину и паролю
+│   │   ├── WardrobeScreen.tsx           # список вещей гардероба
+│   │   ├── OutfitsScreen.tsx            # сохранённые образы
+│   │   ├── MatchScreen.tsx              # подбор образов
+│   │   └── ProfileScreen.tsx            # мои данные, статистика, выход
 │   │
 │   └── components/
-│       ├── OutfitComposite.tsx     # рендер flat-lay раскладки образа
-│       ├── ClothingCard.tsx        # карточка вещи в гардеробе
-│       ├── ItemDetailDialog.tsx    # детальный просмотр вещи
-│       ├── ScreenHeader.tsx        # заголовок экрана
+│       ├── OutfitComposite.tsx          # рендер flat-lay раскладки образа
+│       ├── ClothingCard.tsx             # карточка вещи в гардеробе
+│       ├── ItemDetailDialog.tsx         # детальный просмотр вещи, цвет, стиль, удаление
+│       ├── ScreenHeader.tsx             # заголовок экрана
 │       └── upload/
-│           ├── UploadDialog.tsx    # диалог-мастер (3 шага)
-│           ├── TypeSelector.tsx    # шаг 1: выбор категории
-│           ├── PhotoCapture.tsx    # шаг 2: фото + удаление фона
-│           └── ColorAssign.tsx     # шаг 3: выбор/подтверждение цвета
+│           ├── UploadDialog.tsx         # диалог-мастер добавления вещи
+│           ├── TypeSelector.tsx         # выбор категории одежды
+│           ├── PhotoCapture.tsx         # фото + удаление фона
+│           ├── ColorAssign.tsx          # выбор/подтверждение цвета
+│           └── StyleSelector.tsx        # dropdown с мультивыбором стилей
 │
 ├── public/
-│   ├── manifest.json               # PWA манифест
+│   ├── manifest.json                    # PWA-манифест
 │   └── icons/
-│       ├── icon-192.png            # иконка PWA
+│       ├── icon-192.png                 # иконка PWA
 │       └── icon-512.png
 │
-├── android/                        # Capacitor Android проект
+├── android/                             # Capacitor Android-проект
 │   ├── app/
 │   │   └── src/main/
-│   │       ├── AndroidManifest.xml # INTERNET + CAMERA permissions
-│   │       └── assets/public/      # dist/ копируется сюда при cap sync
-│   ├── gradle.properties           # org.gradle.java.home (JDK 21)
-│   └── local.properties            # sdk.dir (Android SDK путь)
+│   │       ├── AndroidManifest.xml      # INTERNET + CAMERA permissions
+│   │       └── assets/public/           # dist/ копируется сюда при cap sync
+│   ├── gradle.properties                # org.gradle.java.home, JDK 21
+│   └── local.properties                 # sdk.dir, Android SDK путь
 │
-├── capacitor.config.ts             # appId, appName, webDir
-├── vite.config.ts                  # Vite конфиг (порт 7878, exclude bg-removal)
+├── capacitor.config.ts                  # appId, appName, webDir
+├── vite.config.ts                       # Vite-конфиг
 ├── package.json
+├── pnpm-lock.yaml
 └── tsconfig.json
 ```
 
 ---
 
+## Пользовательские данные и авторизация
+
+Авторизация реализована локально. Приложение не использует сервер, базу данных или сетевые запросы для входа.
+
+### Ключи localStorage
+
+| Ключ | Что хранит |
+|---|---|
+| `current_user_v1` | Текущий авторизованный пользователь |
+| `wardrobe_v1_root` | Гардероб пользователя `root` |
+| `wardrobe_v1_user` | Гардероб пользователя `user` |
+| `outfits_v1_root` | Образы пользователя `root` |
+| `outfits_v1_user` | Образы пользователя `user` |
+
+### Вход
+
+При запуске приложения, если пользователь не авторизован, открывается экран входа.
+
+Пользователь вводит логин и пароль. Если пара совпадает с локальным списком пользователей, объект пользователя сохраняется в `localStorage['current_user_v1']`.
+
+### Выход
+
+На странице **Мои данные** есть кнопка **Выйти из аккаунта**. Она удаляет `current_user_v1` и возвращает приложение на экран входа.
+
+### Изоляция данных
+
+Гардероб и образы привязаны к логину пользователя через отдельные ключи localStorage. Это значит, что при переключении с `root` на `user` приложение загружает другой набор вещей и образов.
+
+---
+
 ## Алгоритмы
+
+### Мастер добавления вещи
+
+Текущий порядок добавления вещи:
+
+```text
+1. Тип одежды
+2. Фотография
+3. Цвет и стиль
+```
+
+На последнем шаге пользователь:
+
+1. Подтверждает или меняет автоматически найденный цвет.
+2. При необходимости выбирает стили одежды через dropdown.
+
+Если стили не выбраны, в поле отображается **Без стиля**. Такая вещь считается универсальной и подходит ко всем стилям.
+
+### Стили одежды
+
+Поддерживаются четыре стиля:
+
+| Код | Отображение |
+|---|---|
+| `sport` | Спортивный |
+| `casual` | Повседневный |
+| `festive` | Праздничный |
+| `formal` | Официальный |
+
+У одной вещи может быть несколько стилей.
+
+Примеры:
+
+```ts
+styles: []
+// Без стиля, универсальная вещь
+
+styles: ['sport']
+// Только спортивная вещь
+
+styles: ['sport', 'casual']
+// Подходит и к спортивным, и к повседневным образам
+```
+
+### Совместимость стилей (`outfitRules.ts`)
+
+Правило простое:
+
+1. Если у вещи `styles = []`, она универсальная и совместима с любым стилем.
+2. Если у обеих вещей есть стили, у них должен быть хотя бы один общий стиль.
+3. Разные стили сами по себе не объединяются.
+
+Примеры:
+
+| Вещь 1 | Вещь 2 | Результат |
+|---|---|---|
+| `[]` | `['formal']` | подходит |
+| `['sport']` | `['formal']` | не подходит |
+| `['casual']` | `['festive']` | не подходит |
+| `['sport', 'casual']` | `['casual']` | подходит |
+| `['formal']` | `['formal', 'festive']` | подходит |
+
+Это предотвращает ситуации, когда спортивные штаны автоматически сочетаются с официальными туфлями только из-за цвета.
 
 ### Удаление фона (`PhotoCapture.tsx` + `@imgly/background-removal`)
 
-Используется модель `isnet_quint8` (квантизированная, ~10 МБ). Работает полностью в браузере через ONNX Runtime WebAssembly. При первом запуске модель скачивается с CDN и кешируется браузером. Результат — PNG с прозрачным фоном, закодированный в base64.
+Используется модель `isnet_quint8`. Она работает полностью в браузере через ONNX Runtime WebAssembly. При первом запуске модель скачивается и кешируется браузером. Результат — PNG с прозрачным фоном, закодированный в base64.
 
-```
-Фото → ONNX isnet_quint8 → PNG без фона (base64) → canvas → detectDominantColor()
+```text
+Фото → ONNX isnet_quint8 → PNG без фона → canvas → detectDominantColor()
 ```
 
 ### Определение доминирующего цвета (`colorDetection.ts`)
 
-1. Изображение масштабируется до 80px по большей стороне (производительность)
-2. Отрисовывается на `<canvas>`, извлекаются пиксели через `getImageData()`
-3. Прозрачные пиксели (alpha < 128) пропускаются
-4. Для каждого пикселя ищется ближайший цвет в палитре по перцептивному расстоянию:
-   ```
-   dist = √(2·ΔR² + 4·ΔG² + 3·ΔB²)
-   ```
-   (зелёный канал весит больше, т.к. глаз к нему чувствительнее)
-5. Голосование — побеждает цвет с наибольшим числом голосов
+1. Изображение масштабируется до 80px по большей стороне.
+2. Изображение отрисовывается на `<canvas>`.
+3. Пиксели извлекаются через `getImageData()`.
+4. Прозрачные пиксели `alpha < 128` пропускаются.
+5. Для каждого пикселя ищется ближайший цвет в палитре по перцептивному расстоянию:
+
+```text
+dist = √(2·ΔR² + 4·ΔG² + 3·ΔB²)
+```
+
+6. Цвет с наибольшим числом голосов считается доминирующим.
 
 ### Цветовая палитра (`colors.ts`)
 
-55 цветов: 5 семей (blue, gray, red, yellow, green) × 11 оттенков каждая.
+55 цветов: 5 семейств × 11 оттенков.
+
+| Семейство | Код |
+|---|---|
+| Синий | `blue` |
+| Серый | `gray` |
+| Красный | `red` |
+| Жёлтый | `yellow` |
+| Зелёный | `green` |
 
 Оттенки генерируются от светлого к тёмному:
-- `lightness = 95 - i * 8` (от 95 до 15)
-- `name = "Blue 0"` ... `"Blue 10"`
+
+```text
+lightness = 95 - i * 8
+name = "Blue 0" ... "Blue 10"
+```
 
 ### Совместимость цветов (`colorCompatibility.ts`)
 
-Функция `areColorsCompatible(a, b)` возвращает `true` если:
-- Хотя бы один из цветов — серый (`gray` — нейтраль, сочетается со всем)
-- Одна цветовая семья (монохром)
-- Комплементарная пара по таблице:
+Функция `areColorsCompatible(a, b)` возвращает `true`, если:
+
+1. Хотя бы один цвет — серый.
+2. Цвета из одной семьи.
+3. Цвета образуют допустимую комплементарную пару.
 
 | Цвет | Совместим с |
 |---|---|
@@ -178,35 +331,49 @@ color-app/
 | green | red, yellow, blue |
 | gray | всё |
 
-`outfitColorScore(colors[])` — доля совместимых пар из всех возможных (0..1).
+`outfitColorScore(colors[])` — доля совместимых пар из всех возможных пар в образе. Значение находится в диапазоне от `0` до `1`.
 
 ### Генерация образов (`outfitGenerator.ts`)
 
-**Правило:** каждый образ содержит `(верх ИЛИ куртку) + низ`.
+Главное структурное правило:
 
-Генерируются все комбинации по убыванию полноты:
+```text
+каждый образ содержит (верх ИЛИ куртку) + низ
+```
+
+Генерируются комбинации:
 
 | Комбинация | Пример |
 |---|---|
-| куртка + верх + низ + обувь | пуховик + свитер + джинсы + кеды |
-| куртка + верх + низ | пуховик + футболка + брюки |
+| куртка + верх + низ + обувь | куртка + футболка + штаны + обувь |
+| куртка + верх + низ | куртка + футболка + брюки |
 | куртка + низ + обувь | куртка + шорты + кроссовки |
 | верх + низ + обувь | футболка + штаны + обувь |
 | верх + низ | футболка + брюки |
 | куртка + низ | куртка + шорты |
 
-**Фильтрация по цвету:**
-- Все комбинации дедуплицируются и сортируются по `outfitColorScore`
-- Приоритет отдаётся образам с `score ≥ 0.5`
-- **Если нет ни одного образа с хорошим score — показываются все** (пользователь не видит пустой экран)
+Этапы генерации:
 
-**`OutfitComposite`** рендерит образ как flat-lay раскладку с абсолютным позиционированием и z-index:
+1. Вещи группируются по категориям.
+2. Создаются все допустимые комбинации.
+3. Комбинации фильтруются через `isOutfitValid()`:
+   - есть низ;
+   - есть верх или куртка;
+   - стили совместимы.
+4. Комбинации дедуплицируются.
+5. Комбинации сортируются по `outfitColorScore()`.
+6. Приоритет отдаётся образам с `score >= 0.5`.
+7. Если хороших цветовых комбинаций нет, показываются все допустимые по структуре и стилям комбинации.
 
-```
-jacket  (zIndex 5) — сверху слева, 65% ширины
-tops    (zIndex 3) — по центру сверху
-bottoms (zIndex 2) — по центру снизу
-shoes   (zIndex 1) — снизу справа
+### Отображение образа (`OutfitComposite.tsx`)
+
+`OutfitComposite` рендерит flat-lay раскладку с абсолютным позиционированием и z-index:
+
+```text
+jacket  — сверху слева, 65% ширины
+tops    — по центру сверху
+bottoms — по центру снизу
+shoes   — снизу справа
 ```
 
 ---
@@ -217,64 +384,64 @@ shoes   (zIndex 1) — снизу справа
 
 | Пакет | Версия | Зачем |
 |---|---|---|
-| `react` + `react-dom` | 18.3 | UI фреймворк |
-| `@mui/material` | 5.15.19 | компоненты (кнопки, диалоги, навигация) |
+| `react` + `react-dom` | 18.3 | UI-фреймворк |
+| `@mui/material` | 5.15.19 | компоненты интерфейса |
 | `@mui/icons-material` | 5.15.19 | иконки |
 | `@emotion/react` + `@emotion/styled` | 11.x | CSS-in-JS для MUI |
-| `@imgly/background-removal` | 1.4.5 | удаление фона (ONNX WASM) |
+| `@imgly/background-removal` | 1.4.5 | удаление фона через ONNX WASM |
 | `uuid` | 9.x | генерация уникальных ID |
 
 ### Dev
 
 | Пакет | Версия | Зачем |
 |---|---|---|
-| `vite` | 5.4 | сборщик / dev-сервер |
-| `@vitejs/plugin-react` | 4.3 | Vite плагин для React |
+| `vite` | 5.4 | сборщик и dev-сервер |
+| `@vitejs/plugin-react` | 4.3 | React-плагин для Vite |
 | `typescript` | 5.5 | типизация |
-| `@capacitor/core` + `cli` + `android` | 8.3 | Android обёртка |
+| `@capacitor/core` + `cli` + `android` | 8.3 | Android-обёртка |
 
 ### Системные зависимости для Android-сборки
 
-| Инструмент | Версия | Где взять |
-|---|---|---|
-| **Node.js** | 18+ | https://nodejs.org |
-| **pnpm** | любая | `npm i -g pnpm` |
-| **JDK 21** (Eclipse Temurin) | 21.0.x | https://adoptium.net → Temurin 21 |
-| **Android SDK** (командная строка) | — | https://developer.android.com/studio#command-line-tools-only |
-| **Android Build Tools** | 36.0.0 | через `sdkmanager` |
-| **Android Platform** | android-36 | через `sdkmanager` |
+| Инструмент | Рекомендуемая версия |
+|---|---|
+| Node.js | 18+ |
+| pnpm | актуальная |
+| JDK | 21 |
+| Android SDK | установлен через Android Studio или command-line tools |
+| Android Build Tools | 36.0.0 |
+| Android Platform | android-36 |
 
-> **Важно:** Capacitor 8 требует именно JDK 21. JDK 17 не подойдёт (ошибка `invalid source release: 21`).
+> Capacitor 8 требует JDK 21. Если Gradle запускается на JDK 17, появится ошибка `invalid source release: 21`.
 
 ---
 
-## Разработка (веб)
+## Разработка веб
 
 ```bash
-# 1. Установить зависимости
 pnpm install
-
-# 2. Запустить dev-сервер
 pnpm dev
-# → http://localhost:7878
 ```
 
-> **Известная проблема:** `pnpm dev` (Vite dev server) выдаёт ошибку `createTheme_default is not a function` из-за бага esbuild с circular deps MUI. Используйте `pnpm serve` вместо `pnpm dev`.
+Dev-сервер:
+
+```text
+http://localhost:7878
+```
+
+Если в dev-режиме появляется ошибка MUI вида `createTheme_default is not a function`, используйте production preview:
 
 ```bash
-# Рекомендуемый способ для разработки — production build + preview
 pnpm serve
-# → http://localhost:7878
 ```
 
 ### Доступные скрипты
 
 | Команда | Описание |
 |---|---|
-| `pnpm dev` | Vite dev сервер (не работает из-за MUI bug) |
-| `pnpm build` | Production сборка в `dist/` |
-| `pnpm preview` | Превью production сборки |
-| `pnpm serve` | `build` + `preview` (рекомендуется) |
+| `pnpm dev` | Vite dev-сервер |
+| `pnpm build` | Production-сборка в `dist/` |
+| `pnpm preview` | Превью production-сборки |
+| `pnpm serve` | `build` + `preview` |
 | `pnpm cap:sync` | `build` + `npx cap sync android` |
 | `pnpm cap:apk` | `cap:sync` + сборка APK через Gradle |
 | `pnpm cap:open` | Открыть Android Studio |
@@ -283,175 +450,277 @@ pnpm serve
 
 ## Сборка PWA
 
-Приложение полностью готово как PWA:
-
 ```bash
 pnpm build
-# → dist/ содержит готовый PWA
 ```
 
-`public/manifest.json` уже настроен:
+Готовая сборка будет в папке:
+
+```text
+dist/
+```
+
+`public/manifest.json` настроен для standalone PWA:
+
 - `display: standalone`
 - `theme_color: #000000`
 - иконки 192×192 и 512×512
 
-Для деплоя — загрузить содержимое `dist/` на любой HTTPS-хостинг (Vercel, Netlify, GitHub Pages и т.д.).
+Для деплоя нужно загрузить содержимое `dist/` на HTTPS-хостинг.
 
 ---
 
 ## Сборка Android APK
 
-### Первоначальная настройка (делается один раз)
+### Первичная настройка
 
-#### 1. Установить JDK 21
+#### 1. JDK 21
 
-Скачать портативный ZIP с https://adoptium.net (Temurin 21, Windows x64) и распаковать, например, в:
-```
-C:\Users\<username>\AppData\Local\jdk-21\jdk-21.0.10+7\
-```
+Установите JDK 21. Например, Eclipse Temurin 21.
 
-#### 2. Установить Android SDK
+Проверьте Java:
 
-Скачать только Command Line Tools с https://developer.android.com/studio#command-line-tools-only
-
-Распаковать в:
-```
-C:\Users\<username>\AppData\Local\Android\Sdk\cmdline-tools\latest\
-```
-
-Установить необходимые компоненты:
 ```powershell
-$sdk = "$env:LOCALAPPDATA\Android\Sdk"
-& "$sdk\cmdline-tools\latest\bin\sdkmanager.bat" `
-  "build-tools;36.0.0" `
-  "platforms;android-36" `
-  "platform-tools"
-# Принять лицензии:
-& "$sdk\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
+java -version
+javac -version
+where.exe java
 ```
 
-#### 3. Настроить пути в проекте
+Если Gradle использует не ту Java, укажите путь в `android/gradle.properties`:
 
-**`android/local.properties`** — путь к Android SDK:
 ```properties
-sdk.dir=C\:/Users/<username>/AppData/Local/Android/Sdk
+org.gradle.java.home=C:/Users/<username>/AppData/Local/Programs/Eclipse Adoptium/jdk-21.0.11.10-hotspot
 ```
-> Используйте прямые слэши или `C\:` — в Java `.properties` обратный слэш является escape-символом!
 
-**`android/gradle.properties`** — путь к JDK 21:
-```properties
-org.gradle.java.home=C:\\Users\\<username>\\AppData\\Local\\jdk-21\\jdk-21.0.10+7
+Путь должен указывать на реальную папку JDK 21.
+
+#### 2. Android SDK
+
+Проверьте стандартный путь:
+
+```powershell
+Test-Path "$env:LOCALAPPDATA\Android\Sdk"
 ```
-> Здесь двойной обратный слэш — правильно, это Java-escape в `.properties`.
+
+Если команда вернула `True`, в `android/local.properties` можно указать:
+
+```properties
+sdk.dir=C:/Users/<username>/AppData/Local/Android/Sdk
+```
+
+Если SDK нет, установите его через Android Studio:
+
+```text
+Android Studio → More Actions → SDK Manager
+```
+
+Установите:
+
+- Android SDK Platform
+- Android SDK Build-Tools
+- Android SDK Platform-Tools
+- Android SDK Command-line Tools
 
 ### Сборка APK
 
-```bash
-# Быстрый способ (одна команда):
+Запускать команду лучше из корня проекта:
+
+```powershell
+cd "C:\Users\TaidanaIshi\Desktop\RGU\android app\designer-app-"
 pnpm cap:apk
+```
 
-# Или пошагово:
-pnpm build                          # собрать веб-приложение
-npx cap sync android                # скопировать dist/ в android/assets/public/
+Или пошагово:
+
+```powershell
+pnpm build
+npx cap sync android
 cd android
-.\gradlew.bat assembleDebug         # собрать APK
+.\gradlew.bat assembleDebug
 ```
 
-APK будет по пути:
-```
+APK будет здесь:
+
+```text
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Повторная сборка после изменений
+### Частые ошибки сборки
 
-```bash
-pnpm cap:apk
-# или
-pnpm build && npx cap sync android && cd android && .\gradlew.bat assembleDebug
+#### `Cannot find type definition file for 'react'`
+
+Причина — повреждённый `node_modules`, часто после переноса проекта архивом.
+
+Решение:
+
+```powershell
+Remove-Item -Recurse -Force node_modules
+Remove-Item -Force package-lock.json -ErrorAction SilentlyContinue
+pnpm install --no-frozen-lockfile
 ```
 
-Gradle кеширует зависимости — повторная сборка занимает ~5–10 секунд.
+#### `Java home supplied is invalid`
+
+В `android/gradle.properties` указан путь к несуществующей JDK.
+
+Решение — указать реальный путь к JDK 21 или удалить строку `org.gradle.java.home`, если системная Java настроена правильно.
+
+#### `SDK location not found`
+
+Gradle не видит Android SDK.
+
+Решение — исправить `android/local.properties`:
+
+```properties
+sdk.dir=C:/Users/<username>/AppData/Local/Android/Sdk
+```
+
+#### `invalid source release: 21`
+
+Gradle запущен на JDK 17 или ниже, а проект требует JDK 21.
+
+Решение — установить JDK 21 и указать её через `org.gradle.java.home`.
 
 ---
 
 ## Установка APK на устройство
 
-### Через ADB (рекомендуется)
+### Через ADB
 
-1. Включить **Режим разработчика** на Android (7 тапов по "Номер сборки" в Настройках)
-2. Включить **Отладку по USB** в Настройках разработчика
-3. Подключить устройство кабелем USB
+1. Включите режим разработчика на Android.
+2. Включите отладку по USB.
+3. Подключите устройство кабелем USB.
 
 ```bash
-# Проверить что устройство видно:
 adb devices
-
-# Установить APK:
 adb install android\app\build\outputs\apk\debug\app-debug.apk
+```
 
-# При переустановке (если уже установлено):
+При переустановке:
+
+```bash
 adb install -r android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
 ### Вручную через файл
 
-Скопировать `app-debug.apk` на телефон (через USB, облако, мессенджер) и открыть файловым менеджером. Потребуется разрешить установку из неизвестных источников.
+Скопируйте `app-debug.apk` на телефон и откройте файловым менеджером. Может потребоваться разрешить установку из неизвестных источников.
 
 ---
 
 ## Известные особенности
 
-### Vite dev server не работает с MUI
+### Данные хранятся локально
 
-**Симптом:** `createTheme_default is not a function` при `pnpm dev`
+Все данные находятся в `localStorage` текущего WebView/браузера. Если удалить данные приложения Android или очистить хранилище браузера, гардероб и образы будут удалены.
 
-**Причина:** esbuild оборачивает `createTheme` из MUI в lazy `__esm()` инициализатор. `Box` вызывает `createTheme_default()` до того как инициализатор отработает — circular dependency.
+### Авторизация демонстрационная
 
-**Решение:** Использовать `pnpm serve` — production build через Rollup не имеет этого бага.
+Логины и пароли захардкожены локально в `src/auth.ts`. Это подходит для MVP и демонстрации, но не является безопасной полноценной авторизацией.
+
+Для production-версии нужно заменить локальную авторизацию на backend/API, токены и серверное хранение пользователей.
+
+### Вещь без стиля универсальна
+
+Если при добавлении или редактировании вещи не выбран ни один стиль, она считается универсальной и может участвовать в любых образах.
 
 ### Первый запуск удаления фона
 
-При первом использовании функции удаления фона браузер скачивает модель `isnet_quint8` (~10 МБ) с CDN. Это происходит один раз — после кеширования работает мгновенно (даже офлайн в PWA режиме).
+При первом использовании удаления фона браузер скачивает модель. После кеширования функция работает быстрее.
 
-### Хранилище данных
+### Лимит localStorage
 
-Все данные (фото одежды в base64, цвета, образы) хранятся в `localStorage`. Лимит обычно 5–10 МБ в зависимости от браузера. При большом гардеробе (много HD фото) возможно переполнение. Рекомендуется добавлять вещи с фото через камеру — качество оптимизируется при удалении фона.
+Фотографии вещей хранятся в base64. При большом количестве изображений возможно переполнение localStorage. Рекомендуется оптимизировать размер изображений.
 
-### Сборка под Android — только Windows
+### Сборка под Android на Windows
 
-Скрипт `cap:apk` использует `gradlew.bat`. На macOS/Linux нужно заменить на `./gradlew assembleDebug`.
+Скрипт `cap:apk` использует `gradlew.bat`. На macOS/Linux нужно запускать Gradle через `./gradlew assembleDebug`.
 
-### Подбор образов
+### Минимальные требования для подбора образов
 
-Экран "Подобрать" требует минимум одну **верхнюю вещь** (футболка, майка, свитер или куртка) и одну **нижнюю вещь** (штаны или шорты). Куртка может выступать как единственная верхняя вещь.
+Экран **Подобрать** требует минимум:
+
+```text
+одна верхняя вещь или куртка + один низ
+```
+
+Верх:
+
+- футболка;
+- длинный рукав;
+- майка;
+- куртка.
+
+Низ:
+
+- штаны;
+- шорты.
 
 ---
 
 ## Типы данных
 
-```typescript
-type ClothingCategory = 'jacket' | 'tshirt' | 'longsleeve' | 'tanktop' | 'pants' | 'shorts' | 'shoes'
+```ts
+type UserLogin = 'root' | 'user'
 
-type ColorFamily = 'blue' | 'gray' | 'red' | 'yellow' | 'green'
+interface AuthUser {
+  login: UserLogin
+  displayName: string
+}
+
+type ClothingCategory =
+  | 'jacket'
+  | 'tshirt'
+  | 'longsleeve'
+  | 'tanktop'
+  | 'pants'
+  | 'shorts'
+  | 'shoes'
+
+type ClothingStyle =
+  | 'sport'
+  | 'casual'
+  | 'festive'
+  | 'formal'
+
+type ColorFamily =
+  | 'blue'
+  | 'gray'
+  | 'red'
+  | 'yellow'
+  | 'green'
 
 interface ColorEntry {
-  name: string      // "Blue 3"
-  hex: string       // "#4A6FFF"
+  name: string
+  hex: string
   family: ColorFamily
-  lightness: number // 0–100
+  lightness: number
 }
 
 interface ClothingItem {
-  id: string           // UUID
+  id: string
   category: ClothingCategory
-  image: string        // base64 PNG (фон удалён)
+  image: string
   color: ColorEntry
-  createdAt: number    // timestamp
+
+  /**
+   * Пустой массив означает "Без стиля".
+   * Такая вещь универсальна и подходит ко всем стилям.
+   */
+  styles: ClothingStyle[]
+
+  /**
+   * Старое поле для совместимости со старыми сохранёнными вещами.
+   */
+  style?: ClothingStyle
+
+  createdAt: number
 }
 
 interface Outfit {
   id: string
-  itemIds: string[]    // массив ClothingItem.id
+  itemIds: string[]
+  tags?: OutfitTag[]
   isFavorite: boolean
   createdAt: number
 }
@@ -463,11 +732,13 @@ interface Outfit {
 
 | Параметр | Значение |
 |---|---|
-| App ID (Android) | `me.panf.obrazy` |
+| App ID Android | `me.panf.obrazy` |
 | App Name | `ОБРАЗЫ` |
-| Android min SDK | 22 (Android 5.1) |
+| Android min SDK | 22 |
 | Android target SDK | 36 |
 | Gradle | 8.14.3 |
 | Android Gradle Plugin | 8.13.0 |
 | Capacitor | 8.3.x |
-| Dev-сервер порт | 7878 |
+| Dev-сервер | `http://localhost:7878` |
+| Авторизация | локальная, `root/root`, `user/user123` |
+| Хранилище | `localStorage`, отдельно по аккаунтам |

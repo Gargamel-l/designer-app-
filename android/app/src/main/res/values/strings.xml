@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ОБРАЗЫ</string>
+    <string name="title_activity_main">ОБРАЗЫ</string>
+    <string name="package_name">me.panf.obrazy</string>
+    <string name="custom_url_scheme">me.panf.obrazy</string>
+</resources>

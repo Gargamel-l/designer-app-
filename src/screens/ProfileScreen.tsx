@@ -1,50 +1,148 @@
-import { Box, Typography, Button, Divider } from '@mui/material'
-import ScreenHeader from '../components/ScreenHeader'
-import { useApp } from '../AppContext'
+import {
+  Box,
+  Button,
+  Typography,
+} from '@mui/material'
+import { AuthUser } from '../auth'
 
-export default function ProfileScreen() {
-  const { items, outfits, favoriteOutfits } = useApp()
+interface Props {
+  user: AuthUser
+  wardrobeCount: number
+  outfitsCount: number
+  favoriteOutfitsCount: number
+  onLogout: () => void
+}
 
-  const stats = [
-    { label: 'Вещей в гардеробе', value: items.length },
-    { label: 'Сохранённых образов', value: favoriteOutfits.length },
-    { label: 'Всего образов', value: outfits.length },
-  ]
-
-  function handleClearWardrobe() {
-    if (confirm('Удалить весь гардероб?')) { localStorage.removeItem('wardrobe_v1'); window.location.reload() }
-  }
-
-  function handleClearOutfits() {
-    if (confirm('Удалить все образы?')) { localStorage.removeItem('outfits_v1'); window.location.reload() }
+export default function ProfileScreen({
+  user,
+  wardrobeCount,
+  outfitsCount,
+  favoriteOutfitsCount,
+  onLogout,
+}: Props) {
+  function handleLogout() {
+    if (confirm('Выйти из аккаунта?')) {
+      onLogout()
+    }
   }
 
   return (
-    <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: 'background.paper' }}>
-      <ScreenHeader title="МОИ ДАННЫЕ" />
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box>
-          {stats.map((s, i) => (
-            <Box key={s.label}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5 }}>
-                <Typography variant="body2" sx={{ color: '#444' }}>{s.label}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{s.value}</Typography>
-              </Box>
-              {i < stats.length - 1 && <Divider />}
-            </Box>
-          ))}
-        </Box>
-        <Divider sx={{ my: 1 }} />
-        <Typography variant="caption" sx={{ color: '#999' }}>Данные хранятся локально на устройстве</Typography>
-        <Button variant="outlined" fullWidth onClick={handleClearWardrobe}
-          sx={{ borderColor: '#e53935', color: '#e53935', fontWeight: 700, mt: 2 }}>
-          Очистить гардероб
-        </Button>
-        <Button variant="outlined" fullWidth onClick={handleClearOutfits}
-          sx={{ borderColor: '#e53935', color: '#e53935', fontWeight: 700 }}>
-          Очистить образы
-        </Button>
+    <Box sx={{ p: 2, pb: 10 }}>
+      <Box
+        sx={{
+          borderBottom: '2px solid #000',
+          pb: 1,
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="h1"
+          sx={{
+            fontSize: '1.6rem',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.03em',
+          }}
+        >
+          Мои данные
+        </Typography>
       </Box>
+
+      <Box
+        sx={{
+          border: '1px solid #e0e0e0',
+          p: 2,
+          mb: 2,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '0.7rem',
+            color: '#888',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            mb: 0.5,
+          }}
+        >
+          Аккаунт
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: '1rem',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+          }}
+        >
+          {user.displayName}
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: '0.75rem',
+            color: '#777',
+            fontWeight: 700,
+            mt: 0.5,
+          }}
+        >
+          Логин: {user.login}
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          border: '1px solid #e0e0e0',
+          p: 2,
+          mb: 2,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '0.7rem',
+            color: '#888',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            mb: 1.5,
+          }}
+        >
+          Статистика
+        </Typography>
+
+        <Box sx={{ display: 'grid', gap: 1 }}>
+          <Typography sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
+            Вещей в гардеробе: {wardrobeCount}
+          </Typography>
+
+          <Typography sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
+            Образов: {outfitsCount}
+          </Typography>
+
+          <Typography sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
+            Избранных образов: {favoriteOutfitsCount}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Button
+        fullWidth
+        variant="outlined"
+        onClick={handleLogout}
+        sx={{
+          height: 44,
+          borderRadius: 0,
+          borderColor: '#000',
+          color: '#000',
+          fontWeight: 900,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          '&:hover': {
+            borderColor: '#000',
+            bgcolor: '#f5f5f5',
+          },
+        }}
+      >
+        Выйти из аккаунта
+      </Button>
     </Box>
   )
 }

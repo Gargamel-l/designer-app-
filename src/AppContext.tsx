@@ -2,38 +2,53 @@ import React, { createContext, useContext, useState } from 'react'
 import { ClothingItem, Outfit, Tab } from './types'
 import { useWardrobe } from './hooks/useWardrobe'
 import { useOutfits } from './hooks/useOutfits'
+import { AuthUser } from './auth'
 
 interface AppContextValue {
   tab: Tab
   setTab: (t: Tab) => void
+
   items: ClothingItem[]
   addItem: (item: ClothingItem) => void
   removeItem: (id: string) => void
   updateItem: (item: ClothingItem) => void
+
   outfits: Outfit[]
   favoriteOutfits: Outfit[]
   saveOutfit: (o: Outfit) => void
   removeOutfit: (id: string) => void
   toggleFavorite: (id: string) => void
+
   uploadOpen: boolean
   setUploadOpen: (v: boolean) => void
 }
 
 const AppContext = createContext<AppContextValue>(null!)
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({
+  children,
+  user,
+}: {
+  children: React.ReactNode
+  user: AuthUser
+}) {
   const [tab, setTab] = useState<Tab>('outfits')
   const [uploadOpen, setUploadOpen] = useState(false)
-  const wardrobe = useWardrobe()
-  const outfitStore = useOutfits()
+
+  const wardrobe = useWardrobe(user)
+  const outfitStore = useOutfits(user)
 
   return (
     <AppContext.Provider
       value={{
-        tab, setTab,
+        tab,
+        setTab,
+
         ...wardrobe,
         ...outfitStore,
-        uploadOpen, setUploadOpen,
+
+        uploadOpen,
+        setUploadOpen,
       }}
     >
       {children}

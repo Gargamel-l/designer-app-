@@ -1,46 +1,107 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Outfit } from '../types'
+import { AuthUser } from '../auth'
 
-const KEY = 'outfits_v1'
+const BASE_KEY = 'outfits_v1'
 
-function load(): Outfit[] {
+function getStorageKey(user: AuthUser | null): string | null {
+  if (!user) return null
+
+  return `${BASE_KEY}_${user.login}`
+}
+
+function normalizeOutfit(outfit: Outfit): Outfit {
+  return {
+    ...outfit,
+    tags: outfit.tags ?? [],
+    isFavorite: outfit.isFavorite ?? false,
+  }
+}
+
+function load(storageKey: string | null): Outfit[] {
+  if (!storageKey) return []
+
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '[]')
+    const raw = JSON.parse(localStorage.getItem(storageKey) ?? '[]') as Outfit[]
+
+    return raw.map(normalizeOutfit)
   } catch {
     return []
   }
 }
 
-function save(outfits: Outfit[]) {
-  localStorage.setItem(KEY, JSON.stringify(outfits))
+function save(storageKey: string | null, outfits: Outfit[]) {
+  if (!storageKey) return
+
+  localStorage.setItem(storageKey, JSON.stringify(outfits))
 }
 
-export function useOutfits() {
-  const [outfits, setOutfits] = useState<Outfit[]>(load)
+export function useOutfits(user: AuthUser | null) {
+  const storageKey = useMemo(() => getStorageKey(user), [user])
+
+  const [state, setState] = useState<{
+    storageKey: string | null
+    outfits: Outfit[]
+  }>(() => ({
+    storageKey,
+    outfits: load(storageKey),
+  }))
 
   useEffect(() => {
-    save(outfits)
-  }, [outfits])
+    if (state.storageKey === storageKey) return
+
+    setState({
+      storageKey,
+      outfits: load(storageKey),
+    })
+  }, [storageKey, state.storageKey])
+
+  useEffect(() => {
+    if (!state.storageKey) return
+    if (state.storageKey !== storageKey) return
+
+    save(state.storageKey, state.outfits)
+  }, [state.storageKey, state.outfits, storageKey])
 
   const saveOutfit = useCallback((outfit: Outfit) => {
-    setOutfits(prev => {
-      const exists = prev.some(o => o.id === outfit.id)
-      if (exists) return prev.map(o => (o.id === outfit.id ? outfit : o))
-      return [outfit, ...prev]
+    setState(prev => {
+      const normalized = normalizeOutfit(outfit)
+      const exists = prev.outfits.some(o => o.id === normalized.id)
+
+      return {
+        ...prev,
+        outfits: exists
+          ? prev.outfits.map(o => (o.id === normalized.id ? normalized : o))
+          : [normalized, ...prev.outfits],
+      }
     })
   }, [])
 
   const removeOutfit = useCallback((id: string) => {
-    setOutfits(prev => prev.filter(o => o.id !== id))
+    setState(prev => ({
+      ...prev,
+      outfits: prev.outfits.filter(o => o.id !== id),
+    }))
   }, [])
 
   const toggleFavorite = useCallback((id: string) => {
-    setOutfits(prev =>
-      prev.map(o => (o.id === id ? { ...o, isFavorite: !o.isFavorite } : o))
-    )
+    setState(prev => ({
+      ...prev,
+      outfits: prev.outfits.map(o =>
+        o.id === id
+          ? { ...o, isFavorite: !o.isFavorite }
+          : o,
+      ),
+    }))
   }, [])
 
-  const favoriteOutfits = outfits.filter(o => o.isFavorite)
+  const favoriteOutfits = state.outfits.filter(o => o.isFavorite)
 
-  return { outfits, favoriteOutfits, saveOutfit, removeOutfit, toggleFavorite }
+  return {
+    outfits: state.outfits,
+    favoriteOutfits,
+    saveOutfit,
+    removeOutfit,
+    toggleFavorite,
+  }
 }

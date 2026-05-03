@@ -1,10 +1,17 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ClothingItem, ClothingStyle } from '../types'
+import { AuthUser } from '../auth'
 
-const KEY = 'wardrobe_v1'
+const BASE_KEY = 'wardrobe_v1'
+
+function getStorageKey(user: AuthUser | null): string | null {
+  if (!user) return null
+
+  return `${BASE_KEY}_${user.login}`
+}
 
 function normalizeStyles(item: ClothingItem): ClothingStyle[] {
-  // Новый формат. Пустой массив styles = без стиля = универсальная вещь.
+  // Пустой массив styles = без стиля = универсальная вещь.
   if (Array.isArray(item.styles)) return item.styles
 
   // Старый формат, если раньше было одно поле style.
@@ -21,9 +28,11 @@ function normalizeItem(item: ClothingItem): ClothingItem {
   }
 }
 
-function load(): ClothingItem[] {
+function load(storageKey: string | null): ClothingItem[] {
+  if (!storageKey) return []
+
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? '[]') as ClothingItem[]
+    const raw = JSON.parse(localStorage.getItem(storageKey) ?? '[]') as ClothingItem[]
 
     return raw.map(normalizeItem)
   } catch (e) {
@@ -32,9 +41,11 @@ function load(): ClothingItem[] {
   }
 }
 
-function save(items: ClothingItem[]) {
+function save(storageKey: string | null, items: ClothingItem[]) {
+  if (!storageKey) return false
+
   try {
-    localStorage.setItem(KEY, JSON.stringify(items))
+    localStorage.setItem(storageKey, JSON.stringify(items))
     return true
   } catch (e) {
     console.error('Failed to save wardrobe to localStorage', e)
@@ -42,34 +53,63 @@ function save(items: ClothingItem[]) {
   }
 }
 
-export function useWardrobe() {
-  const [items, setItems] = useState<ClothingItem[]>(load)
+export function useWardrobe(user: AuthUser | null) {
+  const storageKey = useMemo(() => getStorageKey(user), [user])
+
+  const [state, setState] = useState<{
+    storageKey: string | null
+    items: ClothingItem[]
+  }>(() => ({
+    storageKey,
+    items: load(storageKey),
+  }))
 
   useEffect(() => {
-    const ok = save(items)
+    if (state.storageKey === storageKey) return
+
+    setState({
+      storageKey,
+      items: load(storageKey),
+    })
+  }, [storageKey, state.storageKey])
+
+  useEffect(() => {
+    if (!state.storageKey) return
+    if (state.storageKey !== storageKey) return
+
+    const ok = save(state.storageKey, state.items)
 
     if (!ok) {
       // тут можно показать toast/snackbar
       // например: "Не удалось сохранить гардероб: слишком большие изображения"
     }
-  }, [items])
+  }, [state.storageKey, state.items, storageKey])
 
   const addItem = useCallback((item: ClothingItem) => {
-    setItems(prev => [normalizeItem(item), ...prev])
+    setState(prev => ({
+      ...prev,
+      items: [normalizeItem(item), ...prev.items],
+    }))
   }, [])
 
   const removeItem = useCallback((id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id))
+    setState(prev => ({
+      ...prev,
+      items: prev.items.filter(i => i.id !== id),
+    }))
   }, [])
 
   const updateItem = useCallback((updated: ClothingItem) => {
-    setItems(prev => prev.map(i => (
-      i.id === updated.id ? normalizeItem(updated) : i
-    )))
+    setState(prev => ({
+      ...prev,
+      items: prev.items.map(i => (
+        i.id === updated.id ? normalizeItem(updated) : i
+      )),
+    }))
   }, [])
 
   return {
-    items,
+    items: state.items,
     addItem,
     removeItem,
     updateItem,

@@ -1,6 +1,6 @@
 {
   "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\TaidanaIshi\\\\DEV\\\\Z3R\\\\color-app\\\\android\\\" && .\\\\gradlew.bat assembleDebug --stacktrace 2>&1 | Select-Object -Last 80\",\"timeout\":300000,\"description\":\"Run Gradle with stacktrace t...",
+  "tool_input_preview": "{\"command\":\"cd \\\"C:\\\\Users\\\\mxp\\\\DEV\\\\Z3R\\\\color-app\\\\android\\\" && .\\\\gradlew.bat assembleDebug --stacktrace 2>&1 | Select-Object -Last 80\",\"timeout\":300000,\"description\":\"Run Gradle with stacktrace t...",
   "error": "Exit code 1\n\u001b[31;1m\tat org.gradle.internal.buildprocess.execution.SetupLoggingActionExecutor.execute(SetupLoggingActionExecutor.java:31)\u001b[0m\r\n\u001b[31;1m\tat org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:70)\u001b[0m\r\n\u001b[31;1m\tat org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)\u001b[0m\r\n\u001b[31;1m\tat org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)\u001b[0m\r\n\u001b[31;1m\tat org.gradle.launcher.daemo...",
   "timestamp": "2026-04-20T21:28:22.277Z",
   "retry_count": 1
